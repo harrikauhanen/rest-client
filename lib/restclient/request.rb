@@ -11,7 +11,7 @@ module RestClient
 		attr_reader :method, :url, :payload, :headers,
 			:cookies, :user, :password, :timeout, :open_timeout,
 			:verify_ssl, :ssl_client_cert, :ssl_client_key, :ssl_ca_file,
-			:raw_response, :follow_redirect
+			:raw_response
 
 		def self.execute(args)
 			new(args).execute
@@ -33,19 +33,18 @@ module RestClient
 			@ssl_client_key  = args[:ssl_client_key] || nil
 			@ssl_ca_file = args[:ssl_ca_file] || nil
 			@tf = nil # If you are a raw request, this is your tempfile
-			@follow_redirect = args[:follow_redirect] || true
 		end
 
 		def execute
 			response = execute_inner
 		rescue Redirect => e
-		  if @follow_redirect
+		  if RestClient.follow_redirect
   			@url = e.url
 	  		@method = :get
 		  	@payload = nil
 			  execute
 			else
-			  respone
+			  response
 			end
 		end
 

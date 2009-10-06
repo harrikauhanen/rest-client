@@ -55,6 +55,10 @@ require File.dirname(__FILE__) + '/restclient/exceptions'
 #
 #   RestClient.proxy = ENV['http_proxy']
 #
+# If you wish not to automatically follow HTTP redirect, define:
+#
+#   RestClient.follow_redirect = false
+#
 # For live tests of RestClient, try using http://rest-test.heroku.com, which echoes back information about the rest call:
 #
 #   >> RestClient.put 'http://rest-test.heroku.com/resource', :foo => 'baz'
@@ -83,6 +87,7 @@ module RestClient
 
 	class << self
 		attr_accessor :proxy
+		attr_accessor :follow_redirect
 	end
 
 	# Print log of RestClient calls.  Value can be stdout, stderr, or a filename.
