@@ -36,16 +36,12 @@ module RestClient
 		end
 
 		def execute
-			response = execute_inner
+			execute_inner
 		rescue Redirect => e
-		  if RestClient.follow_redirect
-  			@url = e.url
-	  		@method = :get
-		  	@payload = nil
-			  execute
-			else
-			  response
-			end
+			@url = e.url
+  		@method = :get
+	  	@payload = nil
+		  execute
 		end
 
 		def execute_inner
@@ -174,21 +170,26 @@ module RestClient
 		end
 
 		def process_result(res)
-			if res.code =~ /\A2\d{2}\z/ 
+		  if res.code =~ /\A2\d{2}\z/
 				# We don't decode raw requests
 				unless @raw_response
 					self.class.decode res['content-encoding'], res.body if res.body
 				end
 			elsif %w(301 302 303).include? res.code
-				url = res.header['Location']
+			  if RestClient.follow_redirect == false
+			    unless @raw_response
+  					self.class.decode res['content-encoding'], res.body if res.body
+  				end
+		    else
+  				url = res.header['Location']
 
-				if url !~ /^http/
-					uri = URI.parse(@url)
-					uri.path = "/#{url}".squeeze('/')
-					url = uri.to_s
+  				if url !~ /^http/
+  					uri = URI.parse(@url)
+  					uri.path = "/#{url}".squeeze('/')
+  					url = uri.to_s
+  				end
+				  raise Redirect, url
 				end
-
-				raise Redirect, url
 			elsif res.code == "304"
 				raise NotModified, res
 			elsif res.code == "401"
