@@ -17,11 +17,13 @@ module RestClient
 
 			# Hash of cookies extracted from response headers
 			def cookies
-				@cookies ||= (self.headers[:set_cookie] || "").split('; ').inject({}) do |out, raw_c|
+				@cookies ||= (self.headers[:set_cookie] || "").split(';;; ').inject({}) do |out, raw_c|
 					key, val = raw_c.split('=')
-					unless %w(expires domain path secure).member?(key)
+					val = val.split(';')[0]
+					#puts "key: #{key}, val: #{val}"
+					#unless %w(expires domain path secure).member?(val)
 						out[key] = val
-					end
+					#end
 					out
 				end
 			end
@@ -33,7 +35,7 @@ module RestClient
 			module ClassMethods
 				def beautify_headers(headers)
 					headers.inject({}) do |out, (key, value)|
-						out[key.gsub(/-/, '_').to_sym] = value.first
+						out[key.gsub(/-/, '_').to_sym] = value.join(';;; ') # Hmm, very ugly indeed. It was "value.first" which will ignore all but the first cookie...
 					out
 					end
 				end
